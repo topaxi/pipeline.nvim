@@ -9,27 +9,26 @@ end
 local M = {}
 
 ---@class pipeline.providers.github.rest.FetchOptions
----@field method 'get'|'patch'|'post'|'put'|'delete'
+---@field method? 'get'|'patch'|'post'|'put'|'delete'
 ---@field callback fun(err: plenary.curl.Error|nil, response: table|nil)
 
 ---@param server string
 ---@param path string
----@param opts? pipeline.providers.github.rest.FetchOptions
-function M.fetch(server, path, opts)
+---@param opts pipeline.providers.github.rest.FetchOptions
+local function fetch(server, path, opts)
   if vim.fn.has('nvim-0.11') == 1 then
     vim.validate('server', server, 'string')
     vim.validate('path', path, 'string')
-    vim.validate('opts', opts, 'table', true)
+    vim.validate('opts', opts, 'table', 'opts must be a table')
   else
     vim.validate {
       server = { server, 'string' },
       path = { path, 'string' },
-      opts = { opts, 'table', true },
+      opts = { opts, 'table' },
     }
   end
 
-  opts = opts or {}
-  opts.callback = opts.callback and vim.schedule_wrap(opts.callback)
+  opts.callback = vim.schedule_wrap(opts.callback)
 
   local url = string.format('https://api.github.com%s', path)
   if server ~= 'github.com' then
@@ -57,6 +56,38 @@ function M.fetch(server, path, opts)
   )
 end
 
+---@class pipeline.providers.github.rest.FetchJsonOptions: pipeline.providers.github.rest.FetchOptions
+---@field map_response? fun(response: table): any
+
+---@param server string
+---@param path string
+---@param opts pipeline.providers.github.rest.FetchJsonOptions
+local function fetch_json(server, path, opts)
+  return fetch(
+    server,
+    path,
+    vim.tbl_extend('force', opts, {
+      callback = function(err, response)
+        if err then
+          return opts.callback(err, nil)
+        end
+
+        if not response then
+          return opts.callback({ message = 'No response body' }, nil)
+        end
+
+        local response_data = vim.json.decode(response.body)
+
+        if opts.map_response then
+          response_data = opts.map_response(response_data)
+        end
+
+        opts.callback(nil, response_data)
+      end,
+    })
+  )
+end
+
 ---@class GhWorkflow
 ---@field id number
 ---@field node_id string
@@ -75,29 +106,15 @@ end
 
 ---@param server string
 ---@param repo string
----@param opts? { callback?: fun(workflows: GhWorkflow[]): any }
+---@param opts { callback: fun(error: plenary.curl.Error|nil, workflows: GhWorkflow[]): any }
 function M.get_workflows(server, repo, opts)
-  opts = opts or {}
-
-  return M.fetch(
+  return fetch_json(
     server,
     string.format('/repos/%s/actions/workflows', repo),
     vim.tbl_deep_extend('force', opts, {
-      callback = function(err, response)
-        if err or not response then
-          return {}
-        end
-
-        ---@type GhWorkflowsResponse | nil
-        local response_data = vim.json.decode(response.body)
-
-        local ret = response_data and response_data.workflows or {}
-
-        if opts.callback then
-          return opts.callback(ret)
-        else
-          return ret
-        end
+      ---@param response GhWorkflowsResponse
+      map_response = function(response)
+        return response.workflows
       end,
     })
   )
@@ -121,43 +138,19 @@ end
 ---@field total_count number
 ---@field workflow_runs GhWorkflowRun[]
 
----@param opts? { callback?: fun(workflow_runs: GhWorkflowRun[]): any }
-local function process_workflow_runs_response(opts)
-  opts = opts or {}
-
-  ---@param err plenary.curl.Error | nil
-  ---@param response table
-  ---@return GhWorkflowRunsResponse
-  return function(err, response)
-    if err or not response then
-      return {}
-    end
-
-    ---@type GhWorkflowRunsResponse | nil
-    local response_data = vim.json.decode(response.body)
-
-    local ret = (response_data and response_data.workflow_runs or {})
-
-    if opts.callback then
-      return opts.callback(ret)
-    else
-      return ret
-    end
-  end
-end
-
 ---@param server string
 ---@param repo string
 ---@param per_page? integer
----@param opts? { callback?: fun(workflow_runs: GhWorkflowRun[]): any }
+---@param opts { callback: fun(err: plenary.curl.Error|nil, workflow_runs: GhWorkflowRun[]): any }
 function M.get_repository_workflow_runs(server, repo, per_page, opts)
-  opts = opts or {}
-
-  return M.fetch(
+  return fetch_json(
     server,
     string.format('/repos/%s/actions/runs', repo),
     vim.tbl_deep_extend('force', { query = { per_page = per_page } }, opts, {
-      callback = process_workflow_runs_response(opts),
+      ---@param response GhWorkflowRunsResponse
+      map_response = function(response)
+        return response.workflow_runs
+      end,
     })
   )
 end
@@ -166,15 +159,16 @@ end
 ---@param repo string
 ---@param workflow_id integer|string
 ---@param per_page? integer
----@param opts? { callback?: fun(workflow_runs: GhWorkflowRun[]): any }
+---@param opts { callback: fun(err: plenary.curl.Error|nil, workflow_runs: GhWorkflowRun[]): any }
 function M.get_workflow_runs(server, repo, workflow_id, per_page, opts)
-  opts = opts or {}
-
-  return M.fetch(
+  return fetch_json(
     server,
     string.format('/repos/%s/actions/workflows/%d/runs', repo, workflow_id),
     vim.tbl_deep_extend('force', { query = { per_page = per_page } }, opts, {
-      callback = process_workflow_runs_response(opts),
+      ---@param response GhWorkflowRunsResponse
+      map_response = function(response)
+        return response.workflow_runs
+      end,
     })
   )
 end
@@ -183,11 +177,9 @@ end
 ---@param repo string
 ---@param workflow_id integer|string
 ---@param ref string
----@param opts? table
+---@param opts { body: table, callback?: fun(err: plenary.curl.Error|nil, response: unknown): any }
 function M.dispatch_workflow(server, repo, workflow_id, ref, opts)
-  opts = opts or {}
-
-  return M.fetch(
+  return fetch(
     server,
     string.format(
       '/repos/%s/actions/workflows/%d/dispatches',
@@ -227,29 +219,15 @@ end
 ---@param repo string
 ---@param workflow_run_id integer
 ---@param per_page? integer
----@param opts? { callback?: fun(workflow_runs: GhWorkflowRunJob[]): any }
+---@param opts { callback: fun(err: plenary.curl.Error|nil, workflow_runs: GhWorkflowRunJob[]): any }
 function M.get_workflow_run_jobs(server, repo, workflow_run_id, per_page, opts)
-  opts = opts or {}
-
-  return M.fetch(
+  return fetch_json(
     server,
     string.format('/repos/%s/actions/runs/%d/jobs', repo, workflow_run_id),
     vim.tbl_deep_extend('force', { query = { per_page = per_page } }, opts, {
-      callback = function(err, response)
-        if err or not response then
-          return {}
-        end
-
-        ---@type GhWorkflowRunJobsResponse | nil
-        local response_data = vim.json.decode(response.body)
-
-        local ret = response_data and response_data.jobs or {}
-
-        if opts.callback then
-          return opts.callback(ret)
-        else
-          return ret
-        end
+      ---@param response GhWorkflowRunJobsResponse
+      map_response = function(response)
+        return response.jobs
       end,
     })
   )

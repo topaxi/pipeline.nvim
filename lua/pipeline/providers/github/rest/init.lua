@@ -61,17 +61,21 @@ function GithubRestProvider:fetch()
   local Mapper = require('pipeline.providers.github.rest._mapper')
 
   gh_api().get_workflows(self.server, self.repo, {
-    callback = function(workflows)
+    callback = function(err, workflows)
       self.store.update_state(function(state)
-        state.pipelines = vim.tbl_map(Mapper.to_pipeline, workflows)
+        state.error = err and err.message or nil
+
+        if not state.error then
+          state.pipelines = vim.tbl_map(Mapper.to_pipeline, workflows)
+        end
       end)
     end,
   })
 
   gh_api().get_repository_workflow_runs(self.server, self.repo, 100, {
-    callback = function(workflow_runs)
+    callback = function(err, workflow_runs)
       ---@type pipeline.Run[]
-      local runs = vim.tbl_map(Mapper.to_run, workflow_runs)
+      local runs = vim.tbl_map(Mapper.to_run, workflow_runs or {})
       ---@type pipeline.Run[]
       local old_runs = vim
         .iter(vim.tbl_values(self.store.get_state().runs))
@@ -79,10 +83,14 @@ function GithubRestProvider:fetch()
         :totable()
 
       self.store.update_state(function(state)
-        state.latest_run = runs[1]
-        state.runs = utils.group_by(function(run)
-          return run.pipeline_id
-        end, runs)
+        state.error = err and err.message or nil
+
+        if not state.error then
+          state.latest_run = runs[1]
+          state.runs = utils.group_by(function(run)
+            return run.pipeline_id
+          end, runs)
+        end
       end)
 
       local running_workflows = utils.uniq(
@@ -96,14 +104,17 @@ function GithubRestProvider:fetch()
 
       for _, run in ipairs(running_workflows) do
         gh_api().get_workflow_run_jobs(self.server, self.repo, run.run_id, 20, {
-          callback = function(jobs)
+          callback = function(err, jobs)
             self.store.update_state(function(state)
-              state.jobs[run.run_id] = vim.tbl_map(Mapper.to_job, jobs)
+              state.error = err and err.message or nil
+              if not state.error then
+                state.jobs[run.run_id] = vim.tbl_map(Mapper.to_job, jobs)
 
-              for _, job in ipairs(jobs) do
-                state.steps[job.id] = vim.tbl_map(function(step)
-                  return Mapper.to_step(job.id, step)
-                end, job.steps)
+                for _, job in ipairs(jobs) do
+                  state.steps[job.id] = vim.tbl_map(function(step)
+                    return Mapper.to_step(job.id, step)
+                  end, job.steps)
+                end
               end
             end)
           end,
@@ -170,12 +181,13 @@ function GithubRestProvider:dispatch(pipeline)
                   pipeline.pipeline_id,
                   5,
                   {
-                    callback = function(workflow_runs)
+                    callback = function(err, workflow_runs)
                       local Mapper =
                         require('pipeline.providers.github.rest._mapper')
                       local runs = vim.tbl_map(Mapper.to_run, workflow_runs)
 
                       store.update_state(function(state)
+                        state.error = err and err.message or nil
                         state.runs = utils.group_by(
                           function(run)
                             return run.pipeline_id

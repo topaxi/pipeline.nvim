@@ -8,6 +8,7 @@ local utils = require('pipeline.utils')
 ---@field title string
 ---@field repo string
 ---@field server string
+---@field error string|nil
 ---@field pipelines pipeline.Pipeline[]
 ---@field runs table<integer | string, pipeline.Run[]> Runs indexed by pipeline id
 ---@field jobs table<integer | string, pipeline.Job[]> Jobs indexed by run id
@@ -17,6 +18,7 @@ local initialState = {
   title = 'pipeline.nvim',
   repo = '',
   server = '',
+  error = nil,
   pipelines = {},
   latest_run = nil,
   runs = {},

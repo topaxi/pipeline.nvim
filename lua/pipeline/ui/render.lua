@@ -77,6 +77,7 @@ function PipelineRender:render(bufnr)
   local state = self.store:get_state()
 
   self:title(state)
+  self:error(state)
   self:pipelines(state)
   self:trim()
 
@@ -87,6 +88,14 @@ end
 ---@param state pipeline.State
 function PipelineRender:title(state)
   self:append(state.title):nl():nl()
+end
+
+--- Render error message
+---@param state pipeline.State
+function PipelineRender:error(state)
+  if state.error then
+    self:append(state.error, 'PipelineError'):nl():nl()
+  end
 end
 
 --- Render each pipeline

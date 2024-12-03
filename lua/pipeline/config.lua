@@ -41,6 +41,8 @@ local defaultConfig = {
   ---@class pipeline.config.Highlights
   highlights = {
     ---@type vim.api.keyset.highlight
+    PipelineError = { link = 'LspDiagnosticsVirtualTextError' },
+    ---@type vim.api.keyset.highlight
     PipelineRunIconSuccess = { link = 'LspDiagnosticsVirtualTextHint' },
     ---@type vim.api.keyset.highlight
     PipelineRunIconFailure = { link = 'LspDiagnosticsVirtualTextError' },
