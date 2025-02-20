@@ -41,23 +41,21 @@ local defaultConfig = {
   ---@class pipeline.config.Highlights
   highlights = {
     ---@type vim.api.keyset.highlight
-    PipelineError = { link = 'LspDiagnosticsVirtualTextError' },
+    PipelineError = { link = 'DiagnosticError' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconSuccess = { link = 'LspDiagnosticsVirtualTextHint' },
+    PipelineRunIconSuccess = { link = 'DiagnosticOk' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconFailure = { link = 'LspDiagnosticsVirtualTextError' },
+    PipelineRunIconFailure = { link = 'DiagnosticError' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconStartup_failure = {
-      link = 'LspDiagnosticsVirtualTextError',
-    },
+    PipelineRunIconStartup_failure = { link = 'DiagnosticError' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconPending = { link = 'LspDiagnosticsVirtualTextWarning' },
+    PipelineRunIconPending = { link = 'DiagnosticWarn' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconRequested = { link = 'LspDiagnosticsVirtualTextWarning' },
+    PipelineRunIconRequested = { link = 'DiagnosticWarn' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconWaiting = { link = 'LspDiagnosticsVirtualTextWarning' },
+    PipelineRunIconWaiting = { link = 'DiagnosticWarn' },
     ---@type vim.api.keyset.highlight
-    PipelineRunIconIn_progress = { link = 'LspDiagnosticsVirtualTextWarning' },
+    PipelineRunIconIn_progress = { link = 'DiagnosticWarn' },
     ---@type vim.api.keyset.highlight
     PipelineRunIconCancelled = { link = 'Comment' },
     ---@type vim.api.keyset.highlight
