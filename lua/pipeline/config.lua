@@ -38,39 +38,24 @@ local defaultConfig = {
       in_progress = '●',
     },
   },
-  ---@class pipeline.config.Highlights
+  ---@alias hl_group 'PipelineError' | 'PipelineRunIconSuccess' | 'PipelineRunIconFailure' | 'PipelineRunIconStartup_failure' | 'PipelineRunIconPending' | 'PipelineRunIconRequested' | 'PipelineRunIconWaiting' | 'PipelineRunIconIn_progress' | 'PipelineRunIconCancelled' | 'PipelineRunIconSkipped' | 'PipelineRunCancelled' | 'PipelineRunSkipped' | 'PipelineJobCancelled' | 'PipelineJobSkipped' | 'PipelineStepCancelled' | 'PipelineStepSkipped'
+  ---@type table<hl_group, vim.api.keyset.highlight>
   highlights = {
-    ---@type vim.api.keyset.highlight
     PipelineError = { link = 'DiagnosticError' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconSuccess = { link = 'DiagnosticOk' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconFailure = { link = 'DiagnosticError' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconStartup_failure = { link = 'DiagnosticError' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconPending = { link = 'DiagnosticWarn' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconRequested = { link = 'DiagnosticWarn' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconWaiting = { link = 'DiagnosticWarn' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconIn_progress = { link = 'DiagnosticWarn' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconSkipped = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineRunCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineRunSkipped = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineJobCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineJobSkipped = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineStepCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineStepSkipped = { link = 'Comment' },
   },
   ---@type nui_split_options
