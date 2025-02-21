@@ -118,13 +118,14 @@ The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/con
     },
   },
   highlights = {
-    PipelineRunIconSuccess = { link = 'LspDiagnosticsVirtualTextHint' },
-    PipelineRunIconFailure = { link = 'LspDiagnosticsVirtualTextError' },
-    PipelineRunIconStartup_failure = { link = 'LspDiagnosticsVirtualTextError' },
-    PipelineRunIconPending = { link = 'LspDiagnosticsVirtualTextWarning' },
-    PipelineRunIconRequested = { link = 'LspDiagnosticsVirtualTextWarning' },
-    PipelineRunIconWaiting = { link = 'LspDiagnosticsVirtualTextWarning' },
-    PipelineRunIconIn_progress = { link = 'LspDiagnosticsVirtualTextWarning' },
+    PipelineError = { link = 'DiagnosticError' },
+    PipelineRunIconSuccess = { link = 'DiagnosticOk' },
+    PipelineRunIconFailure = { link = 'DiagnosticError' },
+    PipelineRunIconStartup_failure = { link = 'DiagnosticError' },
+    PipelineRunIconPending = { link = 'DiagnosticWarn' },
+    PipelineRunIconRequested = { link = 'DiagnosticWarn' },
+    PipelineRunIconWaiting = { link = 'DiagnosticWarn' },
+    PipelineRunIconIn_progress = { link = 'DiagnosticWarn' },
     PipelineRunIconCancelled = { link = 'Comment' },
     PipelineRunIconSkipped = { link = 'Comment' },
     PipelineRunCancelled = { link = 'Comment' },
@@ -148,7 +149,6 @@ The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/con
     },
   },
 }
-
 ```
 
 ## lualine integration
