@@ -38,41 +38,24 @@ local defaultConfig = {
       in_progress = '●',
     },
   },
-  ---@class pipeline.config.Highlights
+  ---@alias hl_group 'PipelineError' | 'PipelineRunIconSuccess' | 'PipelineRunIconFailure' | 'PipelineRunIconStartup_failure' | 'PipelineRunIconPending' | 'PipelineRunIconRequested' | 'PipelineRunIconWaiting' | 'PipelineRunIconIn_progress' | 'PipelineRunIconCancelled' | 'PipelineRunIconSkipped' | 'PipelineRunCancelled' | 'PipelineRunSkipped' | 'PipelineJobCancelled' | 'PipelineJobSkipped' | 'PipelineStepCancelled' | 'PipelineStepSkipped'
+  ---@type table<hl_group, vim.api.keyset.highlight>
   highlights = {
-    ---@type vim.api.keyset.highlight
-    PipelineError = { link = 'LspDiagnosticsVirtualTextError' },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconSuccess = { link = 'LspDiagnosticsVirtualTextHint' },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconFailure = { link = 'LspDiagnosticsVirtualTextError' },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconStartup_failure = {
-      link = 'LspDiagnosticsVirtualTextError',
-    },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconPending = { link = 'LspDiagnosticsVirtualTextWarning' },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconRequested = { link = 'LspDiagnosticsVirtualTextWarning' },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconWaiting = { link = 'LspDiagnosticsVirtualTextWarning' },
-    ---@type vim.api.keyset.highlight
-    PipelineRunIconIn_progress = { link = 'LspDiagnosticsVirtualTextWarning' },
-    ---@type vim.api.keyset.highlight
+    PipelineError = { link = 'DiagnosticError' },
+    PipelineRunIconSuccess = { link = 'DiagnosticOk' },
+    PipelineRunIconFailure = { link = 'DiagnosticError' },
+    PipelineRunIconStartup_failure = { link = 'DiagnosticError' },
+    PipelineRunIconPending = { link = 'DiagnosticWarn' },
+    PipelineRunIconRequested = { link = 'DiagnosticWarn' },
+    PipelineRunIconWaiting = { link = 'DiagnosticWarn' },
+    PipelineRunIconIn_progress = { link = 'DiagnosticWarn' },
     PipelineRunIconCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineRunIconSkipped = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineRunCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineRunSkipped = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineJobCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineJobSkipped = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineStepCancelled = { link = 'Comment' },
-    ---@type vim.api.keyset.highlight
     PipelineStepSkipped = { link = 'Comment' },
   },
   ---@type nui_split_options
