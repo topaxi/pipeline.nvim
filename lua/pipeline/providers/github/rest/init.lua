@@ -22,7 +22,7 @@ local defaultOptions = {
 local GithubRestProvider = Provider:extend()
 
 function GithubRestProvider.detect()
-  if not utils.file_exists('.github/workflows') then
+  if not utils.file_exists_in_git_root('.github/workflows') then
     return false
   end
 
