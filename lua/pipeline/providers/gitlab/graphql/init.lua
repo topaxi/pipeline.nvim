@@ -22,7 +22,7 @@ local defaultOptions = {
 local GitlabGraphQLProvider = Provider:extend()
 
 function GitlabGraphQLProvider.detect()
-  if not utils.file_exists('.gitlab-ci.yml') then
+  if not utils.file_exists_in_git_root('.gitlab-ci.yml') then
     return false
   end
 
