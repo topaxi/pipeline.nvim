@@ -10,8 +10,12 @@ local defaultConfig = {
   ---@field github? pipeline.providers.github.rest.Options
   ---@field gitlab? pipeline.providers.gitlab.graphql.Options
   providers = {
-    github = {},
-    gitlab = {},
+    github = {
+      rename_hosts = {}
+    },
+    gitlab = {
+      rename_hosts = {}
+    },
   },
   --- Allowed hosts to fetch data from, github.com is always allowed
   --- @type string[]
