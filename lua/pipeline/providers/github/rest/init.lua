@@ -163,10 +163,11 @@ function GithubRestProvider:dispatch(pipeline)
   if pipeline then
     local server = store.get_state().server
     local repo = store.get_state().repo
+    local Config = require('pipeline.config')
 
     -- TODO should we get current ref instead or show an input with the
     --      default branch or current ref preselected?
-    local default_branch = require('pipeline.git').get_default_branch()
+    local dispatch_branch = Config.get_dispatch_branch()
     ---@type pipeline.providers.github.WorkflowDef|nil
     local workflow_config =
       require('pipeline.yaml').read_yaml_file(pipeline.meta.workflow_path)
@@ -198,7 +199,7 @@ function GithubRestProvider:dispatch(pipeline)
           server,
           repo,
           pipeline.pipeline_id,
-          default_branch,
+          dispatch_branch,
           {
             body = { inputs = input_values or {} },
             callback = function(_err, _res)
