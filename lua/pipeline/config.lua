@@ -96,6 +96,7 @@ local defaultConfig = {
     PipelineStepCancelled = { link = 'Comment' },
     PipelineStepSkipped = { link = 'Comment' },
   },
+  ---@module 'nui.split'
   ---@type nui_split_options
   split = {
     relative = 'editor',
