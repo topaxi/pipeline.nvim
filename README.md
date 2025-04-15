@@ -85,7 +85,7 @@ The following keybindings are provided by the plugin:
 
 The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/config.lua))
 
-```lua
+````lua
 {
   --- The browser executable path to open workflow runs/jobs in
   browser = nil,
@@ -95,18 +95,44 @@ The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/con
   indent = 2,
   providers = {
     github = {
+      default_host = 'github.com',
       --- Mapping of names that should be renamed to resolvable hostnames
-      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
-      --- like aliases from ssh config
-      --- for example: gh = "github.com"
-      rename_hosts = {}
+      --- names are something that you've used as a repository url,
+      --- that can't be resolved by this plugin, like aliases from ssh config
+      --- for example to resolve "gh" to "github.com"
+      --- ```lua
+      --- resolve_host = function(host)
+      ---   if host == "gh" then
+      ---     return "github.com"
+      ---   end
+      --- end
+      --- ```
+      --- Return nil to fallback to the default_host
+      ---@param host string
+      ---@return string|nil
+      resolve_host = function(host)
+        return host
+      end,
     },
     gitlab = {
+      default_host = 'gitlab.com',
       --- Mapping of names that should be renamed to resolvable hostnames
-      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
-      --- like aliases from ssh config
-      --- for example: gl = "gitlab.com"
-      rename_hosts = {}
+      --- names are something that you've used as a repository url,
+      --- that can't be resolved by this plugin, like aliases from ssh config
+      --- for example to resolve "gl" to "gitlab.com"
+      --- ```lua
+      --- resolve_host = function(host)
+      ---   if host == "gl" then
+      ---     return "gitlab.com"
+      ---   end
+      --- end
+      --- ```
+      --- Return nil to fallback to the default_host
+      ---@param host string
+      ---@return string|nil
+      resolve_host = function(host)
+        return host
+      end,
     },
   },
   --- Allowed hosts to fetch data from, github.com is always allowed
@@ -161,7 +187,7 @@ The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/con
     },
   },
 }
-```
+````
 
 ## lualine integration
 

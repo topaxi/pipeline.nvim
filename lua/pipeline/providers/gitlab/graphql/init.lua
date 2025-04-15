@@ -30,17 +30,11 @@ function GitlabGraphQLProvider.detect()
     return false
   end
 
-  local config = require('pipeline.config')
+  local Config = require('pipeline.config')
   local server, repo = git().get_current_repository()
+  server = Config.resolve_host_for('gitlab', server)
 
-  for k, v in pairs(config.options.providers.gitlab.rename_hosts) do
-    if k == server then
-      server = v
-      break
-    end
-  end
-
-  if not config.is_host_allowed(server) then
+  if not Config.is_host_allowed(server) then
     return
   end
 
@@ -53,15 +47,10 @@ function GitlabGraphQLProvider:init(opts)
 
   Provider.init(self, self.opts)
 
+  local Config = require('pipeline.config')
   local server, repo = git().get_current_repository()
 
-  self.server = server
-  for k, v in pairs(self.opts.rename_hosts) do
-    if k == server then
-      self.server = v
-      break
-    end
-  end
+  self.server = Config.resolve_host_for('gitlab', server)
   self.repo = repo
 
   self.store.update_state(function(state)

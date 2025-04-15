@@ -11,18 +11,44 @@ local defaultConfig = {
   ---@field gitlab? pipeline.providers.gitlab.graphql.Options
   providers = {
     github = {
+      default_host = 'github.com',
       --- Mapping of names that should be renamed to resolvable hostnames
-      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
-      --- like aliases from ssh config
-      --- for example: gh = "github.com"
-      rename_hosts = {}
+      --- names are something that you've used as a repository url,
+      --- that can't be resolved by this plugin, like aliases from ssh config
+      --- for example to resolve "gh" to "github.com"
+      --- ```lua
+      --- resolve_host = function(host)
+      ---   if host == "gh" then
+      ---     return "github.com"
+      ---   end
+      --- end
+      --- ```
+      --- Return nil to fallback to the default_host
+      ---@param host string
+      ---@return string|nil
+      resolve_host = function(host)
+        return host
+      end,
     },
     gitlab = {
+      default_host = 'gitlab.com',
       --- Mapping of names that should be renamed to resolvable hostnames
-      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
-      --- like aliases from ssh config
-      --- for example: gl = "gitlab.com"
-      rename_hosts = {}
+      --- names are something that you've used as a repository url,
+      --- that can't be resolved by this plugin, like aliases from ssh config
+      --- for example to resolve "gl" to "gitlab.com"
+      --- ```lua
+      --- resolve_host = function(host)
+      ---   if host == "gl" then
+      ---     return "gitlab.com"
+      ---   end
+      --- end
+      --- ```
+      --- Return nil to fallback to the default_host
+      ---@param host string
+      ---@return string|nil
+      resolve_host = function(host)
+        return host
+      end,
     },
   },
   --- Allowed hosts to fetch data from, github.com is always allowed
@@ -108,6 +134,15 @@ function M.is_host_allowed(host)
   end
 
   return false
+end
+
+---@param provider string
+---@param host string
+function M.resolve_host_for(provider, host)
+  return M.options.providers[provider]
+      and M.options.providers[provider].resolve_host
+      and M.options.providers[provider].resolve_host(host)
+    or M.options.providers[provider].default_host
 end
 
 return M
