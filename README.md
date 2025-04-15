@@ -137,6 +137,12 @@ The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/con
   },
   --- Allowed hosts to fetch data from, github.com is always allowed
   allowed_hosts = {},
+  --- Configure which branch to use to dispatch workflow
+  --- set to "default" to use the repository default branch
+  --- set to "current" to use the branch you're currently checked out
+  --- set to any valid branch name to use that branch
+  --- @type string
+  dispatch_branch = "default",
   icons = {
     workflow_dispatch = '⚡️',
     conclusion = {
