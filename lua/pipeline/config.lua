@@ -11,9 +11,17 @@ local defaultConfig = {
   ---@field gitlab? pipeline.providers.gitlab.graphql.Options
   providers = {
     github = {
+      --- Mapping of names that should be renamed to resolvable hostnames
+      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
+      --- like aliases from ssh config
+      --- for example: gh = "github.com"
       rename_hosts = {}
     },
     gitlab = {
+      --- Mapping of names that should be renamed to resolvable hostnames
+      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
+      --- like aliases from ssh config
+      --- for example: gl = "gitlab.com"
       rename_hosts = {}
     },
   },

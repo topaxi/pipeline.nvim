@@ -94,8 +94,20 @@ The default options (as defined in [lua/config.lua](./blob/main/lua/pipeline/con
   --- How much workflow runs and jobs should be indented
   indent = 2,
   providers = {
-    github = {},
-    gitlab = {},
+    github = {
+      --- Mapping of names that should be renamed to resolvable hostnames
+      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
+      --- like aliases from ssh config
+      --- for example: gh = "github.com"
+      rename_hosts = {}
+    },
+    gitlab = {
+      --- Mapping of names that should be renamed to resolvable hostnames
+      --- names are something that you've used as a repository url, that can't be resolved by this plugin,
+      --- like aliases from ssh config
+      --- for example: gl = "gitlab.com"
+      rename_hosts = {}
+    },
   },
   --- Allowed hosts to fetch data from, github.com is always allowed
   allowed_hosts = {},
