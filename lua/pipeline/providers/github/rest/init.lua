@@ -274,7 +274,7 @@ function GithubRestProvider:dispatch(pipeline)
         local question = require('pipeline.ui.components.input') {
           prompt = prompt,
           title = pipeline.name,
-          default_value = input.default,
+          default_value = tostring(input.default),
           on_submit = function(value)
             input_values[name] = value
             ask_next()
