@@ -80,7 +80,7 @@ function GithubRestProvider:fetch_workflows()
       self.store.update_state(function(state)
         state.error = err and err.message or nil
 
-        if not state.error then
+        if (not state.error and workflows) then
           state.pipelines = vim.tbl_map(Mapper.to_pipeline, workflows)
         end
       end)
