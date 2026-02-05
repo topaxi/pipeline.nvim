@@ -3,14 +3,14 @@ describe('get_current_repository parsing', function()
 
   local cases = {
     {
-      url = 'https://github.com/sudo-tee/opencode.nvim',
+      url = 'https://github.com/nvim-org/repo.nvim',
       server = 'github.com',
-      repo = 'sudo-tee/opencode.nvim',
+      repo = 'nvim-org/repo.nvim',
     },
     {
-      url = 'git@github.com:bakdata/pytest-testcontainers-compose.git',
+      url = 'git@github.com:some-org/some-repo.git',
       server = 'github.com',
-      repo = 'bakdata/pytest-testcontainers-compose',
+      repo = 'some-org/some-repo',
     },
     {
       url = 'https://git.example.com/org/project/subgroup/app',
