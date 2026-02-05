@@ -32,26 +32,26 @@ local function get_workflow_run_icon(run)
   end
 
   return Config.options.icons.status[run.status]
-    or Config.options.icons.status.unknown
+      or Config.options.icons.status.unknown
 end
 
 ---@param run { status: string, conclusion: string }
 ---@param prefix string
 ---@return string|nil
-local function get_status_highlight(run, prefix)
+function PipelineRender.get_status_highlight(run, prefix)
   if not run then
     return nil
   end
 
   if run.status == 'completed' then
     return 'Pipeline'
-      .. utils.string.upper_first(prefix)
-      .. utils.string.upper_first(run.conclusion)
+        .. utils.string.upper_first(prefix)
+        .. utils.string.upper_first(run.conclusion)
   end
 
   return 'Pipeline'
-    .. utils.string.upper_first(prefix)
-    .. utils.string.upper_first(run.status)
+      .. utils.string.upper_first(prefix)
+      .. utils.string.upper_first(run.status)
 end
 
 ---@param store pipeline.ReadonlyStore
@@ -112,16 +112,16 @@ function PipelineRender:pipeline(state, pipeline, runs)
     local runs_n = math.min(5, #runs)
 
     self
-      :status_icon(runs[1])
-      :append(' ')
-      :append(pipeline.name, get_status_highlight(runs[1], 'run'))
-      :append(
-        state.workflow_configs[pipeline.pipeline_id]
-            and state.workflow_configs[pipeline.pipeline_id].config.on.workflow_dispatch
-            and (' ' .. Config.options.icons.workflow_dispatch)
+        :status_icon(runs[1])
+        :append(' ')
+        :append(pipeline.name, self.get_status_highlight(runs[1], 'run'))
+        :append(
+          state.workflow_configs[pipeline.pipeline_id]
+          and state.workflow_configs[pipeline.pipeline_id].config.on.workflow_dispatch
+          and (' ' .. Config.options.icons.workflow_dispatch)
           or ''
-      )
-      :nl()
+        )
+        :nl()
 
     -- TODO cutting down on how many we list here, as we fetch 100 overall repo
     -- runs on opening the split. I guess we do want to have this configurable.
@@ -140,10 +140,10 @@ end
 function PipelineRender:run(state, run)
   self:with_location({ kind = 'run', value = run }, function()
     self
-      :status_icon(run, { indent = 1 })
-      :append(' ')
-      :append(run.name, get_status_highlight(run, 'run'))
-      :nl()
+        :status_icon(run, { indent = 1 })
+        :append(' ')
+        :append(run.name, self.get_status_highlight(run, 'run'))
+        :nl()
 
     if run.status ~= 'completed' then
       for _, job in ipairs(state.jobs[run.run_id] or {}) do
@@ -158,10 +158,10 @@ end
 function PipelineRender:job(state, job)
   self:with_location({ kind = 'job', value = job }, function()
     self
-      :status_icon(job, { indent = 2 })
-      :append(' ')
-      :append(job.name, get_status_highlight(job, 'job'))
-      :nl()
+        :status_icon(job, { indent = 2 })
+        :append(' ')
+        :append(job.name, self.get_status_highlight(job, 'job'))
+        :nl()
 
     if job.status ~= 'completed' and state.steps[job.job_id] then
       for _, step in ipairs(state.steps[job.job_id]) do
@@ -175,10 +175,10 @@ end
 function PipelineRender:step(step)
   self:with_location({ kind = 'step', value = step }, function()
     self
-      :status_icon(step, { indent = 3 })
-      :append(' ')
-      :append(step.name, get_status_highlight(step, 'step'))
-      :nl()
+        :status_icon(step, { indent = 3 })
+        :append(' ')
+        :append(step.name, self.get_status_highlight(step, 'step'))
+        :nl()
   end)
 end
 
@@ -189,7 +189,7 @@ function PipelineRender:status_icon(status, opts)
 
   self:append(
     get_workflow_run_icon(status),
-    get_status_highlight(status, 'RunIcon'),
+    self.get_status_highlight(status, 'RunIcon'),
     opts
   )
 

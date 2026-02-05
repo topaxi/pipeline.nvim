@@ -15,9 +15,16 @@ local default_options = {
       return ''
     end
 
-    return component.icons.get_workflow_run_icon(latest_run)
-      .. ' '
-      .. latest_run.name
+    return table.concat {
+      -- TODO: Can't reuse normal hls, need to create them specifically for
+      --       lualine first.
+      --component:format_hl(PipelineRender.get_status_highlight(latest_run, 'run')),
+      component:get_default_hl(),
+      component.icons().get_workflow_run_icon(latest_run),
+      component:get_default_hl(),
+      ' ',
+      latest_run.name,
+    }
   end,
 
   on_click = function()
@@ -32,25 +39,23 @@ function Component:init(options)
 
   Component.super.init(self, self.options)
 
-  self.store = require('pipeline.store')
-  self.icons = require('pipeline.utils.icons')
-
-  local server, repo = require('pipeline.git').get_current_repository()
-
-  if not server or not repo then
-    return
-  end
-
   require('pipeline').start_polling()
 
-  self.store.on_update(function()
-    require('lualine').refresh()
-  end)
+  self.store().on_update(require('lualine').refresh)
+end
+
+---@package
+function Component.store()
+  return require('pipeline.store')
+end
+
+function Component.icons()
+  return require('pipeline.utils.icons')
 end
 
 ---@override
 function Component:update_status()
-  return self.options.format(self, self.store.get_state())
+  return self.options.format(self, self.store().get_state())
 end
 
 return Component
