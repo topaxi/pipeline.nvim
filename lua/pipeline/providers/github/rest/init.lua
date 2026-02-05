@@ -80,7 +80,7 @@ function GithubRestProvider:fetch_workflows()
       self.store.update_state(function(state)
         state.error = err and err.message or nil
 
-        if (not state.error and workflows) then
+        if not state.error and workflows then
           state.pipelines = vim.tbl_map(Mapper.to_pipeline, workflows)
         end
       end)
@@ -239,15 +239,52 @@ function GithubRestProvider:dispatch(pipeline)
           }
         )
 
+        local function format_input_value(value)
+          if type(value) == 'string' then
+            if value:find('%s') then
+              return string.format('%q', value)
+            end
+
+            return value
+          end
+
+          if type(value) == 'table' then
+            local ok, encoded = pcall(vim.json.encode, value)
+            if ok then
+              return encoded
+            end
+          end
+
+          return tostring(value)
+        end
+
+        local function format_input_values(values)
+          if not values or vim.tbl_isempty(values) then
+            return ''
+          end
+
+          local keys = vim.tbl_keys(values)
+          table.sort(keys, function(a, b)
+            return tostring(a) < tostring(b)
+          end)
+
+          local parts = {}
+          for _, key in ipairs(keys) do
+            local value = format_input_value(values[key])
+            table.insert(parts, string.format('%s=%s', key, value))
+          end
+
+          return table.concat(parts, ', ')
+        end
+
         if #questions == 0 then
           vim.notify(string.format('Dispatched %s', pipeline.name))
         else
-          -- TODO format by iterating instead of inspect
           vim.notify(
             string.format(
               'Dispatched %s with %s',
               pipeline.name,
-              vim.inspect(input_values)
+              format_input_values(input_values)
             )
           )
         end
