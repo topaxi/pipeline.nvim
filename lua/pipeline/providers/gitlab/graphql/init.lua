@@ -32,6 +32,9 @@ function GitlabGraphQLProvider.detect()
 
   local Config = require('pipeline.config')
   local server, repo = git().get_current_repository()
+  if server == Config.options.providers.github.default_host then
+    return false
+  end
   server = Config.resolve_host_for('gitlab', server)
 
   if not Config.is_host_allowed(server) then
