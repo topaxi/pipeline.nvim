@@ -42,13 +42,18 @@ local function create_job(job)
   return require('plenary.job'):new(job)
 end
 
-local function glab_graphql(query, variables)
+local function glab_graphql(query, variables, host)
   local args = {
     'api',
     'graphql',
     '-f',
     'query=' .. query,
   }
+
+  if host and host ~= '' then
+    table.insert(args, '--hostname')
+    table.insert(args, host)
+  end
 
   for key, value in pairs(variables) do
     table.insert(args, '-F')
@@ -93,13 +98,16 @@ end
 ---@class pipeline.providers.gitlab.graphql.QueryResponse
 ---@field data { project: pipeline.providers.gitlab.graphql.QueryResponseProject }
 
----@param _host string Currently unused, glab selects the host automatically
+---@param host string|nil
 ---@param repo string
 ---@param limit number
 ---@param callback fun(response: pipeline.providers.gitlab.graphql.QueryResponse)
-function M.get_project_pipelines(_host, repo, limit, callback)
-  local query_job =
-    glab_graphql(pipelines_with_jobs_query, { repo = repo, limit = limit })
+function M.get_project_pipelines(host, repo, limit, callback)
+  local query_job = glab_graphql(
+    pipelines_with_jobs_query,
+    { repo = repo, limit = limit },
+    host
+  )
 
   query_job:start()
   query_job:after(function(job)

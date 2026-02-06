@@ -15,6 +15,17 @@ local function strip_git_suffix(str)
   return str
 end
 
+---@param origin_url string
+---@return string|nil, string|nil
+local function parse_origin_url(origin_url)
+  local cleaned = strip_git_suffix(origin_url)
+  cleaned = cleaned:gsub('^%w+://', '')
+  cleaned = cleaned:gsub('^.+@', '')
+  cleaned = cleaned:gsub(':', '/', 1)
+
+  return cleaned:match('^([^/]+)/(.+)$')
+end
+
 ---@return string, string
 ---@nodiscard
 function M.get_current_repository()
@@ -31,9 +42,7 @@ function M.get_current_repository()
 
   local origin_url = table.concat(origin_url_job:result(), '')
 
-  local server, repo =
-    strip_git_suffix(origin_url):match('([^@/:]+)[:/]([^/]+/[^/]+)$')
-
+  local server, repo = parse_origin_url(origin_url)
   return server, repo
 end
 
@@ -63,5 +72,7 @@ function M.get_default_branch()
 
   return 'main'
 end
+
+M._parse_origin_url = parse_origin_url
 
 return M
