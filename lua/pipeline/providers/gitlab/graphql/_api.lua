@@ -37,33 +37,48 @@ local pipelines_with_jobs_query = [[
   }
 ]]
 
----@param job Job
-local function create_job(job)
-  return require('plenary.job'):new(job)
+local function gl_utils()
+  return require('pipeline.providers.gitlab.utils')
 end
 
-local function glab_graphql(query, variables, host)
-  local args = {
-    'api',
-    'graphql',
-    '-f',
-    'query=' .. query,
-  }
-
+---@param host string|nil
+---@param query string
+---@param variables table
+---@param callback fun(err: string|nil, response: table|nil)
+local function graphql_request(host, query, variables, callback)
+  local url
   if host and host ~= '' then
-    table.insert(args, '--hostname')
-    table.insert(args, host)
+    url = string.format('https://%s/api/graphql', host)
+  else
+    url = 'https://gitlab.com/api/graphql'
   end
 
-  for key, value in pairs(variables) do
-    table.insert(args, '-F')
-    table.insert(args, key .. '=' .. value)
-  end
+  local token = gl_utils().get_gitlab_token(host)
 
-  return create_job {
-    command = 'glab',
-    args = args,
-  }
+  local curl = require('plenary.curl')
+
+  curl.post(url, {
+    headers = {
+      Authorization = string.format('Bearer %s', token),
+      ['Content-Type'] = 'application/json',
+    },
+    body = vim.json.encode({ query = query, variables = variables }),
+    callback = vim.schedule_wrap(function(response)
+      if not response or not response.body then
+        callback('No response body', nil)
+        return
+      end
+      local ok, decoded = pcall(vim.json.decode, response.body)
+      if not ok then
+        callback('Failed to decode response: ' .. tostring(decoded), nil)
+        return
+      end
+      callback(nil, decoded)
+    end),
+    on_error = vim.schedule_wrap(function(err)
+      callback(tostring(err), nil)
+    end),
+  })
 end
 
 ---@alias pipeline.providers.gitlab.graphql.CiJobStatus 'CANCELED'|'CANCELING'|'CREATED'|'FAILED'|'MANUAL'|'PENDING'|'PREPARING'|'RUNNING'|'SCHEDULED'|'SKIPPED'|'SUCCESS'|'WAITING_FOR_CALLBACK'|'WAITING_FOR_RESOURCE'
@@ -103,16 +118,18 @@ end
 ---@param limit number
 ---@param callback fun(response: pipeline.providers.gitlab.graphql.QueryResponse)
 function M.get_project_pipelines(host, repo, limit, callback)
-  local query_job = glab_graphql(
+  graphql_request(
+    host,
     pipelines_with_jobs_query,
     { repo = repo, limit = limit },
-    host
+    function(err, response)
+      if err then
+        error(err)
+        return
+      end
+      callback(response)
+    end
   )
-
-  query_job:start()
-  query_job:after(function(job)
-    callback(vim.json.decode(table.concat(job:result(), '')))
-  end)
 end
 
 return M
