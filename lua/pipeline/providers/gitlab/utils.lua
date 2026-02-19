@@ -1,7 +1,7 @@
 ---@class pipeline.providers.gitlab.Utils
 local M = {}
 
----@param server? string
+---@param server string
 ---@return string|nil
 local function get_token_from_glab_cli(server)
   local has_glab_installed = vim.fn.executable('glab') == 1
@@ -9,11 +9,7 @@ local function get_token_from_glab_cli(server)
     return nil
   end
 
-  local args = { 'glab', 'config', 'get', 'token' }
-  if server ~= nil and server ~= '' then
-    table.insert(args, '--host')
-    table.insert(args, server)
-  end
+  local args = { 'glab', 'config', 'get', 'token', '--host', server }
 
   local res = vim.fn.system(args)
   local token = string.gsub(res or '', '\n', '')
@@ -25,7 +21,7 @@ local function get_token_from_glab_cli(server)
   return token
 end
 
----@param server? string
+---@param server string
 ---@return string, string
 function M.get_gitlab_token(server)
   local token = vim.env.GITLAB_TOKEN

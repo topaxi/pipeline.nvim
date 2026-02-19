@@ -41,17 +41,12 @@ local function gl_utils()
   return require('pipeline.providers.gitlab.utils')
 end
 
----@param host string|nil
+---@param host string
 ---@param query string
 ---@param variables table
 ---@param callback fun(err: string|nil, response: table|nil)
 local function graphql_request(host, query, variables, callback)
-  local url
-  if host and host ~= '' then
-    url = string.format('https://%s/api/graphql', host)
-  else
-    url = 'https://gitlab.com/api/graphql'
-  end
+  local url = string.format('https://%s/api/graphql', host)
 
   local token = gl_utils().get_gitlab_token(host)
 
@@ -62,7 +57,7 @@ local function graphql_request(host, query, variables, callback)
       Authorization = string.format('Bearer %s', token),
       ['Content-Type'] = 'application/json',
     },
-    body = vim.json.encode({ query = query, variables = variables }),
+    body = vim.json.encode { query = query, variables = variables },
     callback = vim.schedule_wrap(function(response)
       if not response or not response.body then
         callback('No response body', nil)
@@ -113,7 +108,7 @@ end
 ---@class pipeline.providers.gitlab.graphql.QueryResponse
 ---@field data { project: pipeline.providers.gitlab.graphql.QueryResponseProject }
 
----@param host string|nil
+---@param host string
 ---@param repo string
 ---@param limit number
 ---@param callback fun(response: pipeline.providers.gitlab.graphql.QueryResponse)

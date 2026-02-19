@@ -13,8 +13,10 @@ function M.check()
     if server then
       local host = Config.resolve_host_for('gitlab', server)
       if Config.is_host_allowed(host) then
-        local k, token, source =
-          pcall(require('pipeline.providers.gitlab.utils').get_gitlab_token, host)
+        local k, token, source = pcall(
+          require('pipeline.providers.gitlab.utils').get_gitlab_token,
+          host
+        )
 
         if k and token then
           if source == 'env' then
