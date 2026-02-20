@@ -8,37 +8,35 @@ function M.check()
 
   health.start('Gitlab GraphQL provider')
 
-  if vim.fn.executable('glab') == 1 then
-    health.ok('Found glab cli')
+  if utils.file_exists_in_git_root('.gitlab-ci.yml') then
+    local server = select(1, git.get_current_repository())
+    if server then
+      local host = Config.resolve_host_for('gitlab', server)
+      if Config.is_host_allowed(host) then
+        local k, token, source = pcall(
+          require('pipeline.providers.gitlab.utils').get_gitlab_token,
+          host
+        )
 
-    if utils.file_exists_in_git_root('.gitlab-ci.yml') then
-      local server = select(1, git.get_current_repository())
-      if server then
-        local host = Config.resolve_host_for('gitlab', server)
-        if Config.is_host_allowed(host) then
-          local output = vim.fn.system({
-            'glab',
-            'auth',
-            'status',
-            '--hostname',
-            host,
-          })
-          if vim.v.shell_error == 0 then
-            health.ok('glab authenticated for ' .. host)
+        if k and token then
+          if source == 'env' then
+            health.ok('Found GitLab token in env')
+          elseif source == 'glab' then
+            health.ok('Found GitLab token via glab cli')
           else
-            health.error('glab not authenticated for ' .. host, output)
+            health.ok('Found GitLab token')
           end
         else
-          health.warn('Host not allowed: ' .. host)
+          health.error('No GitLab token found')
         end
       else
-        health.warn('Unable to resolve gitlab host')
+        health.warn('Host not allowed: ' .. host)
       end
     else
-      health.ok('Skipping glab auth check (no .gitlab-ci.yml)')
+      health.warn('Unable to resolve gitlab host')
     end
   else
-    health.error('glab cli not found')
+    health.ok('Skipping GitLab auth check (no .gitlab-ci.yml)')
   end
 end
 
