@@ -32,8 +32,6 @@ Either have the cli [yq](https://github.com/mikefarah/yq) installed or:
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Cargo](https://doc.rust-lang.org/cargo/)
 
-Additionally, the Gitlab provider needs the [`glab`](https://docs.gitlab.com/ee/editor_extensions/gitlab_cli/) cli to be installed.
-
 ### lazy.nvim
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim)
@@ -55,13 +53,15 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ### GitHub
 
-The plugin requires authentication with your GitHub account to access your workflows and runs. You can authenticate by running the `gh auth login command` in your terminal and following the prompts.
+Define a `GITHUB_TOKEN` variable in your environment.
 
-Alternatively, define a `GITHUB_TOKEN` variable in your environment.
+Alternatively, if the [`gh`](https://cli.github.com/) cli is installed and authenticated via `gh auth login`, the token will be sourced from it automatically.
 
-### Gitlab
+### GitLab
 
-The plugin interacts with Gitlab via the `glab` cli, all that is needed is being authenticated through `glab auth login`.
+Define a `GITLAB_TOKEN` variable in your environment.
+
+Alternatively, if the [`glab`](https://docs.gitlab.com/ee/editor_extensions/gitlab_cli/) cli is installed and authenticated via `glab auth login`, the token will be sourced from it automatically.
 
 ## Usage
 
