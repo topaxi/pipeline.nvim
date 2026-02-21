@@ -93,14 +93,13 @@ function M.group_by(fn, tbl)
   return m
 end
 
-
 ---@param file string
 ---@return boolean
 function M.file_exists_in_git_root(file)
   local git_root_dir = vim.fn
     .fnamemodify(vim.trim(vim.fn.system('git rev-parse --show-toplevel')), ':p')
     :gsub('/$', '')
-  return vim.loop.fs_stat(git_root_dir .. "/" .. file) ~= nil
+  return vim.loop.fs_stat(git_root_dir .. '/' .. file) ~= nil
 end
 
 ---@param file string

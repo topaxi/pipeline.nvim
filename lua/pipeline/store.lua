@@ -5,7 +5,6 @@ local utils = require('pipeline.utils')
 ---@field config table
 
 ---@class pipeline.State
----@field title string
 ---@field repo string
 ---@field server string
 ---@field error string|nil
@@ -15,7 +14,6 @@ local utils = require('pipeline.utils')
 ---@field steps table<integer | string, pipeline.Step[]> Steps indexed by job id
 ---@field workflow_configs table<integer, pipeline.StatePipelineConfig>
 local initialState = {
-  title = 'pipeline.nvim',
   repo = '',
   server = '',
   error = nil,
