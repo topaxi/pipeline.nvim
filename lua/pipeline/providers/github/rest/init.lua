@@ -202,39 +202,11 @@ function GithubRestProvider:dispatch(pipeline)
           dispatch_branch,
           {
             body = { inputs = input_values or {} },
-            callback = function(_err, _res)
-              utils.delay(2000, function()
-                gh_api().get_workflow_runs(
-                  server,
-                  repo,
-                  pipeline.pipeline_id,
-                  5,
-                  {
-                    callback = function(err, workflow_runs)
-                      local Mapper =
-                        require('pipeline.providers.github.rest._mapper')
-                      local runs = vim.tbl_map(Mapper.to_run, workflow_runs)
-
-                      store.update_state(function(state)
-                        state.error = err and err.message or nil
-                        if not state.error then
-                          state.runs = utils.group_by(
-                            function(run)
-                              return run.pipeline_id
-                            end,
-                            utils.uniq(function(run)
-                              return run.run_id
-                            end, {
-                              unpack(runs),
-                              unpack(vim.iter(state.runs):flatten():totable()),
-                            })
-                          )
-                        end
-                      end)
-                    end,
-                  }
-                )
-              end)
+            callback = function(err, res)
+              if err or not res then
+                return
+              end
+              self:fetch_jobs(res.workflow_run_id)
             end,
           }
         )

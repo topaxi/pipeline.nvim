@@ -76,6 +76,13 @@ local function fetch_json(server, path, opts)
           return opts.callback({ message = 'No response body' }, nil)
         end
 
+        if response.status >= 400 then
+          return opts.callback(
+            { message = string.format('HTTP %d', response.status) },
+            nil
+          )
+        end
+
         local response_data = vim.json.decode(response.body)
 
         if opts.map_response then
@@ -173,13 +180,18 @@ function M.get_workflow_runs(server, repo, workflow_id, per_page, opts)
   )
 end
 
+---@class GhWorkflowDispatchResponse
+---@field workflow_run_id integer
+---@field run_url string
+---@field html_url string
+
 ---@param server string
 ---@param repo string
 ---@param workflow_id integer|string
 ---@param ref string
----@param opts { body: table, callback?: fun(err: plenary.curl.Error|nil, response: unknown): any }
+---@param opts { body: table, callback?: fun(err: plenary.curl.Error|nil, response: GhWorkflowDispatchResponse|nil): any }
 function M.dispatch_workflow(server, repo, workflow_id, ref, opts)
-  return fetch(
+  return fetch_json(
     server,
     string.format(
       '/repos/%s/actions/workflows/%d/dispatches',
@@ -189,7 +201,10 @@ function M.dispatch_workflow(server, repo, workflow_id, ref, opts)
     vim.tbl_deep_extend('force', {}, opts, {
       method = 'post',
       body = vim.json.encode(
-        vim.tbl_deep_extend('force', {}, opts.body or {}, { ref = ref })
+        vim.tbl_deep_extend('force', {}, opts.body or {}, {
+          ref = ref,
+          return_run_details = true,
+        })
       ),
     })
   )
