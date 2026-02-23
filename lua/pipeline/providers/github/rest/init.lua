@@ -153,8 +153,6 @@ function GithubRestProvider:dispatch(pipeline)
     return
   end
 
-  local store = require('pipeline.store')
-
   if pipeline then
     local Config = require('pipeline.config')
 
