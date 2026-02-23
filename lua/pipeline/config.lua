@@ -59,7 +59,7 @@ local defaultConfig = {
   --- set to "current" to use the branch you're currently checked out
   --- set to any valid branch name to use that branch
   --- @type string
-  dispatch_branch = "default",
+  dispatch_branch = 'default',
   ---@class pipeline.config.Icons
   icons = {
     workflow_dispatch = '⚡️',
@@ -154,8 +154,8 @@ end
 
 function M.get_dispatch_branch()
   local git = require('pipeline.git')
-  return M.options.dispatch_branch == "default" and git.get_default_branch()
-    or M.options.dispatch_branch == "current" and git.get_current_branch()
+  return M.options.dispatch_branch == 'default' and git.get_default_branch()
+    or M.options.dispatch_branch == 'current' and git.get_current_branch()
     or M.options.dispatch_branch
 end
 

@@ -1,10 +1,6 @@
 local utils = require('pipeline.utils')
 local Provider = require('pipeline.providers.polling')
 
-local function git()
-  return require('pipeline.git')
-end
-
 local function gh_api()
   return require('pipeline.providers.github.rest._api')
 end
@@ -21,36 +17,35 @@ local defaultOptions = {
 ---@field private repo string
 local GithubRestProvider = Provider:extend()
 
-function GithubRestProvider.detect()
+---@param remote pipeline.Remote
+---@return boolean
+function GithubRestProvider.detect(remote)
   if not utils.file_exists_in_git_root('.github/workflows') then
     return false
   end
 
   local Config = require('pipeline.config')
-  local server, repo = git().get_current_repository()
-  server = Config.resolve_host_for('github', server)
+  local server = Config.resolve_host_for('github', remote.server)
 
   if not Config.is_host_allowed(server) then
-    return
+    return false
   end
 
-  return server ~= nil and repo ~= nil
+  return server ~= nil and remote.repo ~= nil
 end
 
 ---@param opts pipeline.providers.github.rest.Options
-function GithubRestProvider:init(opts)
+---@param remote pipeline.Remote
+function GithubRestProvider:init(opts, remote)
   self.opts = vim.tbl_deep_extend('force', defaultOptions, opts)
 
   Provider.init(self, self.opts)
 
-  local server, repo = git().get_current_repository()
-
   local Config = require('pipeline.config')
-  self.server = Config.resolve_host_for('github', server)
-  self.repo = repo
+  self.server = Config.resolve_host_for('github', remote.server)
+  self.repo = remote.repo
 
   self.store.update_state(function(state)
-    state.title = string.format('Github Workflows for %s', repo)
     state.server = self.server
     state.repo = self.repo
   end)
@@ -158,11 +153,7 @@ function GithubRestProvider:dispatch(pipeline)
     return
   end
 
-  local store = require('pipeline.store')
-
   if pipeline then
-    local server = store.get_state().server
-    local repo = store.get_state().repo
     local Config = require('pipeline.config')
 
     -- TODO should we get current ref instead or show an input with the
@@ -196,8 +187,8 @@ function GithubRestProvider:dispatch(pipeline)
         questions[i]:mount()
       else
         gh_api().dispatch_workflow(
-          server,
-          repo,
+          self.server,
+          self.repo,
           pipeline.pipeline_id,
           dispatch_branch,
           {

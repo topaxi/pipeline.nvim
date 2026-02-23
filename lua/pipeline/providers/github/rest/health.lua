@@ -6,7 +6,7 @@ function M.check()
   health.start('Github REST provider')
 
   local k, token, source =
-      pcall(require('pipeline.providers.github.utils').get_github_token)
+    pcall(require('pipeline.providers.github.utils').get_github_token)
 
   if k and token then
     if source == 'env' then
