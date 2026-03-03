@@ -85,7 +85,11 @@ end
 --- Render title of the split window
 ---@param state pipeline.State
 function PipelineRender:title(state)
-  self:append(state.title):nl():nl()
+  local title = 'pipeline.nvim'
+  if state.repo and state.repo ~= '' then
+    title = string.format('Pipelines for %s', state.repo)
+  end
+  self:append(title):nl():nl()
 end
 
 --- Render error message

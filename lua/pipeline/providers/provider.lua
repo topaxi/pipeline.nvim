@@ -37,7 +37,10 @@ function Provider:extend()
   return Class
 end
 
-function Provider.detect()
+---Detect whether this provider handles the given remote.
+---@param remote pipeline.Remote
+---@return boolean
+function Provider.detect(remote)
   vim.notify_once('Provider does not implement detect', vim.log.levels.WARN)
 
   return false
@@ -47,19 +50,21 @@ end
 ---@param config pipeline.Config
 ---@param store pipeline.Store
 ---@param opts? table
+---@param remote? pipeline.Remote
 ---@return self
-function Provider:new(config, store, opts)
+function Provider:new(config, store, opts, remote)
   local instance = setmetatable({}, self)
   instance.config = config
   instance.store = store
   instance.listener_count = 0
-  instance:init(opts or {})
+  instance:init(opts or {}, remote)
   return instance
 end
 
 ---Constructor function, called when creating a new Provider instance.
 ---@param opts table
-function Provider:init(opts) end
+---@param remote? pipeline.Remote
+function Provider:init(opts, remote) end
 
 ---Start fetching or listening to data from the provider.
 function Provider:connect() end

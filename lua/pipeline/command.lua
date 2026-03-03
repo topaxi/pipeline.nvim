@@ -18,6 +18,8 @@ local function handle_pipeline_command(a)
     return pipeline.close()
   elseif action == 'toggle' then
     return pipeline.toggle()
+  elseif action == 'remote' then
+    return pipeline.select_remote()
   end
 end
 
@@ -26,6 +28,7 @@ local function completion_customlist()
     'open',
     'close',
     'toggle',
+    'remote',
   }
 end
 

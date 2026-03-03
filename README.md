@@ -16,6 +16,7 @@ The pipeline.nvim plugin for Neovim allows developers to easily manage and dispa
 
 - List pipelines and their runs for the current repository
 - Run/dispatch pipelines with `workflow_dispatch`
+- Support for multiple remotes (e.g. `origin` + `upstream`)
 
 ## ToDo
 
@@ -70,6 +71,7 @@ Alternatively, if the [`glab`](https://docs.gitlab.com/ee/editor_extensions/gitl
 - `:Pipeline` or `:Pipeline toggle` toggles the `pipeline.nvim` split
 - `:Pipeline open` opens the `pipeline.nvim` split
 - `:Pipeline close` closes the `pipeline.nvim` split
+- `:Pipeline remote` opens a picker to switch the active remote
 
 ### Keybindings
 
@@ -79,6 +81,7 @@ The following keybindings are provided by the plugin:
 - `gp` - open the pipeline below the cursor on GitHub
 - `gr` - open the run below the cursor on GitHub
 - `gj` - open the job of the workflow run below the cursor on GitHub
+- `gR` - switch the active remote
 - `d` - dispatch a new run for the workflow below the cursor on GitHub
 
 ### Options

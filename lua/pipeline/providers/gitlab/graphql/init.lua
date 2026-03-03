@@ -1,10 +1,6 @@
 local utils = require('pipeline.utils')
 local Provider = require('pipeline.providers.polling')
 
-local function git()
-  return require('pipeline.git')
-end
-
 local function glab_api()
   return require('pipeline.providers.gitlab.graphql._api')
 end
@@ -21,39 +17,38 @@ local defaultOptions = {
 ---@field private repo string
 local GitlabGraphQLProvider = Provider:extend()
 
-function GitlabGraphQLProvider.detect()
+---@param remote pipeline.Remote
+---@return boolean
+function GitlabGraphQLProvider.detect(remote)
   if not utils.file_exists_in_git_root('.gitlab-ci.yml') then
     return false
   end
 
   local Config = require('pipeline.config')
-  local server, repo = git().get_current_repository()
-  if server == Config.options.providers.github.default_host then
+  if remote.server == Config.options.providers.github.default_host then
     return false
   end
-  server = Config.resolve_host_for('gitlab', server)
+  local server = Config.resolve_host_for('gitlab', remote.server)
 
   if not Config.is_host_allowed(server) then
-    return
+    return false
   end
 
-  return server ~= nil and repo ~= nil
+  return server ~= nil and remote.repo ~= nil
 end
 
----@param opts pipeline.providers.github.rest.Options
-function GitlabGraphQLProvider:init(opts)
+---@param opts pipeline.providers.gitlab.graphql.Options
+---@param remote pipeline.Remote
+function GitlabGraphQLProvider:init(opts, remote)
   self.opts = vim.tbl_deep_extend('force', defaultOptions, opts)
 
   Provider.init(self, self.opts)
 
   local Config = require('pipeline.config')
-  local server, repo = git().get_current_repository()
-
-  self.server = Config.resolve_host_for('gitlab', server)
-  self.repo = repo
+  self.server = Config.resolve_host_for('gitlab', remote.server)
+  self.repo = remote.repo
 
   self.store.update_state(function(state)
-    state.title = string.format('Gitlab Pipelines for %s', repo)
     state.server = self.server
     state.repo = self.repo
   end)

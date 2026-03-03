@@ -1,5 +1,9 @@
 local M = {
   init_root = '',
+  ---@type { remote: pipeline.Remote, provider_name: string }[]
+  available_remotes = {},
+  ---@type pipeline.Provider|nil
+  pipeline = nil,
 }
 
 ---@param opts? pipeline.Config
@@ -16,26 +20,123 @@ function M.setup(opts)
 end
 
 function M.setup_provider()
-  if M.pipeline then
+  if #M.available_remotes > 0 then
     return
+  end
+
+  local git = require('pipeline.git')
+  local Config = require('pipeline.config')
+  local remotes = git.get_remotes()
+
+  -- Phase 1: Detect matching (remote, provider) pairs from local git data
+  for _, remote in ipairs(remotes) do
+    for provider_name, _ in pairs(Config.options.providers) do
+      local Provider = require('pipeline.providers')[provider_name]
+
+      if Provider.detect(remote) then
+        table.insert(M.available_remotes, {
+          remote = remote,
+          provider_name = provider_name,
+        })
+        break -- one provider type per remote
+      end
+    end
+  end
+
+  -- Phase 2: Pick the best default and activate
+  local selected = M.pick_default_remote()
+  if selected then
+    M.activate(selected)
+  else
+    local store = require('pipeline.store')
+    M.pipeline =
+      require('pipeline.providers.provider'):new(Config.options, store)
+  end
+end
+
+---Pick the best remote to activate by default.
+---Prefers origin for backwards compatibility, then first match.
+---@return { remote: pipeline.Remote, provider_name: string }|nil
+function M.pick_default_remote()
+  if #M.available_remotes == 0 then
+    return nil
+  end
+
+  -- Prefer origin for backwards compatibility
+  for _, entry in ipairs(M.available_remotes) do
+    if entry.remote.name == 'origin' then
+      return entry
+    end
+  end
+
+  -- Last resort: first match
+  return M.available_remotes[1]
+end
+
+---Activate a specific remote as the current provider.
+---Tears down any existing provider and creates a new one.
+---@param entry { remote: pipeline.Remote, provider_name: string }
+function M.activate(entry)
+  -- Tear down existing provider if active
+  if
+    M.pipeline
+    and M.pipeline.listener_count
+    and M.pipeline.listener_count > 0
+  then
+    M.pipeline:disconnect()
   end
 
   local Config = require('pipeline.config')
   local store = require('pipeline.store')
+  local Provider = require('pipeline.providers')[entry.provider_name]
+  local provider_options = Config.options.providers[entry.provider_name]
 
-  for provider, provider_options in pairs(Config.options.providers) do
-    local Provider = require('pipeline.providers')[provider]
+  -- Reset store state for the new remote
+  store.update_state(function(state)
+    state.error = nil
+    state.pipelines = {}
+    state.runs = {}
+    state.jobs = {}
+    state.steps = {}
+    state.workflow_configs = {}
+  end)
 
-    if Provider.detect() then
-      M.pipeline = Provider:new(Config.options, store, provider_options)
-      break
+  M.pipeline =
+    Provider:new(Config.options, store, provider_options, entry.remote)
+end
+
+---Open a picker to select from available remotes.
+function M.select_remote()
+  if #M.available_remotes <= 1 then
+    vim.notify('No other remotes available', vim.log.levels.INFO)
+    return
+  end
+
+  local was_polling = M.pipeline
+    and M.pipeline.listener_count
+    and M.pipeline.listener_count > 0
+
+  vim.ui.select(M.available_remotes, {
+    prompt = 'Select remote',
+    format_item = function(entry)
+      return string.format(
+        '%s (%s/%s)',
+        entry.remote.name,
+        entry.remote.server,
+        entry.remote.repo
+      )
+    end,
+  }, function(selected)
+    if not selected then
+      return
     end
-  end
 
-  if not M.pipeline then
-    M.pipeline =
-      require('pipeline.providers.provider'):new(Config.options, store)
-  end
+    M.activate(selected)
+
+    if was_polling then
+      M.pipeline:listen()
+    end
+  end)
 end
 
 function M.start_polling()
@@ -116,6 +217,10 @@ function M.open()
   ui.split:map('n', 'gs', function()
     open_pipeline_url(ui.get_step())
   end, { noremap = true, desc = 'Open pipeline step URL' })
+
+  ui.split:map('n', 'gR', function()
+    M.select_remote()
+  end, { noremap = true, desc = 'Select remote' })
 
   ui.split:map('n', 'd', function()
     M.pipeline:dispatch(ui.get_pipeline())

@@ -35,13 +35,14 @@ function Component:init(options)
   self.store = require('pipeline.store')
   self.icons = require('pipeline.utils.icons')
 
-  local server, repo = require('pipeline.git').get_current_repository()
+  local pipeline = require('pipeline')
+  pipeline.setup_provider()
 
-  if not server or not repo then
+  if not pipeline.pipeline then
     return
   end
 
-  require('pipeline').start_polling()
+  pipeline.start_polling()
 
   self.store.on_update(function()
     require('lualine').refresh()

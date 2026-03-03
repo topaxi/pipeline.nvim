@@ -8,6 +8,28 @@ end
 ---@class pipeline.providers.github.rest.Api
 local M = {}
 
+---@param server string
+---@param path string
+---@return string
+local function build_url(server, path)
+  if server ~= 'github.com' then
+    return string.format('https://%s/api/v3%s', server, path)
+  end
+
+  return string.format('https://api.github.com%s', path)
+end
+
+---@param server string
+---@return table
+local function auth_headers(server)
+  return {
+    Authorization = string.format(
+      'Bearer %s',
+      gh_utils().get_github_token(nil, server)
+    ),
+  }
+end
+
 ---@class pipeline.providers.github.rest.FetchOptions
 ---@field method? 'get'|'patch'|'post'|'put'|'delete'
 ---@field callback fun(err: plenary.curl.Error|nil, response: table|nil)
@@ -30,22 +52,13 @@ local function fetch(server, path, opts)
 
   opts.callback = vim.schedule_wrap(opts.callback)
 
-  local url = string.format('https://api.github.com%s', path)
-  if server ~= 'github.com' then
-    url = string.format('https://%s/api/v3%s', server, path)
-  end
-
+  local url = build_url(server, path)
   local curl = require('plenary.curl')
 
   return curl[opts.method or 'get'](
     url,
     vim.tbl_deep_extend('force', opts, {
-      headers = {
-        Authorization = string.format(
-          'Bearer %s',
-          gh_utils().get_github_token(nil, server)
-        ),
-      },
+      headers = auth_headers(server),
       callback = function(response)
         opts.callback(nil, response)
       end,
