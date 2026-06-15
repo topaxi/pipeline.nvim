@@ -76,6 +76,10 @@ function Provider:disconnect() end
 ---@param pipeline pipeline.Pipeline|nil
 function Provider:dispatch(pipeline) end
 
+---Trigger a manual Job run
+---@param job pipeline.Job|nil
+function Provider:trigger(job) end
+
 ---Retry a failed pipeline run/job/step
 ---@param pipeline_object pipeline.PipelineObject|nil
 function Provider:retry(pipeline_object) end

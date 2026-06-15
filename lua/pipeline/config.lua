@@ -76,19 +76,21 @@ local defaultConfig = {
     status = {
       unknown = '?',
       pending = '○',
+      manual = '▶',
       queued = '○',
       requested = '○',
       waiting = '○',
       in_progress = '●',
     },
   },
-  ---@alias hl_group 'PipelineError' | 'PipelineRunIconSuccess' | 'PipelineRunIconFailure' | 'PipelineRunIconStartup_failure' | 'PipelineRunIconPending' | 'PipelineRunIconRequested' | 'PipelineRunIconWaiting' | 'PipelineRunIconIn_progress' | 'PipelineRunIconCancelled' | 'PipelineRunIconSkipped' | 'PipelineRunCancelled' | 'PipelineRunSkipped' | 'PipelineJobCancelled' | 'PipelineJobSkipped' | 'PipelineStepCancelled' | 'PipelineStepSkipped'
+  ---@alias hl_group 'PipelineError' | 'PipelineRunIconSuccess' | 'PipelineRunIconFailure' | 'PipelineRunIconManual' | 'PipelineRunIconStartup_failure' | 'PipelineRunIconPending' | 'PipelineRunIconRequested' | 'PipelineRunIconWaiting' | 'PipelineRunIconIn_progress' | 'PipelineRunIconCancelled' | 'PipelineRunIconSkipped' | 'PipelineRunCancelled' | 'PipelineRunSkipped' | 'PipelineJobCancelled' | 'PipelineJobSkipped' | 'PipelineStepCancelled' | 'PipelineStepSkipped'
   ---@type table<hl_group, vim.api.keyset.highlight>
   highlights = {
     PipelineError = { link = 'DiagnosticError' },
     PipelineRunIconSuccess = { link = 'DiagnosticOk' },
     PipelineRunIconFailure = { link = 'DiagnosticError' },
     PipelineRunIconStartup_failure = { link = 'DiagnosticError' },
+    PipelineRunIconManual = { link = 'DiagnosticInfo' },
     PipelineRunIconPending = { link = 'DiagnosticWarn' },
     PipelineRunIconRequested = { link = 'DiagnosticWarn' },
     PipelineRunIconWaiting = { link = 'DiagnosticWarn' },
