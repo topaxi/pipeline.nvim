@@ -1,0 +1,26 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "api"
+    - when: never
+
+stages:
+  - echo
+
+dispatch-echo-no-inputs:
+  stage: echo
+  when: manual
+  script:
+    - sleep 30
+    - echo 'Hello, World!'
+
+dispatch-echo:
+  stage: echo
+  when: manual
+  variables:
+    VALUE: "Hello, World!"
+    SLEEP: "30"
+    LOGLEVEL: "info"
+  script:
+    - sleep "$SLEEP"
+    - 'echo "$LOGLEVEL: $VALUE"'
