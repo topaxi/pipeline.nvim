@@ -18,9 +18,9 @@ dispatch-echo:
   stage: echo
   when: manual
   variables:
-    VALUE: "Hello, World!"
-    SLEEP: "30"
-    LOGLEVEL: "info"
+    VALUE: 'Hello, World!'
+    SLEEP: '30'
+    LOGLEVEL: 'info'
   script:
     - sleep "$SLEEP"
     - 'echo "$LOGLEVEL: $VALUE"'
