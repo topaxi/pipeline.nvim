@@ -119,4 +119,59 @@ function GitlabGraphQLProvider:dispatch(pipeline)
   end
 end
 
+---@param job pipeline.Job|nil
+function GitlabGraphQLProvider:trigger(job)
+  if not job then
+    return
+  end
+
+  if
+    job.status == 'in_progress'
+    or job.status == 'queued'
+    or job.status == 'pending'
+  then
+    vim.notify('Job is already active: ' .. job.status, vim.log.levels.WARN)
+    return
+  end
+
+  -- If it's not active and not finished, check if it's manual
+  if job.status ~= 'manual' and job.status ~= 'unknown' then
+    vim.notify(
+      'This is not a manual job (Status: ' .. job.status .. ')',
+      vim.log.levels.INFO
+    )
+    return
+  end
+
+  glab_api().trigger_manual_job(self.server, job.job_id, function(err, response)
+    if err or not response then
+      vim.notify('Failed to execute job trigger: ' .. err, vim.log.levels.ERROR)
+      return
+    end
+
+    if response.errors and #response.errors > 0 then
+      local msg = response.errors[1].message or 'Unknown GraphQL error'
+      vim.notify('GitLab: ' .. msg, vim.log.levels.ERROR)
+      return
+    end
+
+    if
+      response.data
+      and response.data.jobPlay
+      and #response.data.jobPlay.errors > 0
+    then
+      vim.notify(
+        'Failed to trigger job: '
+          .. table.concat(response.data.jobPlay.errors, ', '),
+        vim.log.levels.ERROR
+      )
+      return
+    end
+
+    self:poll()
+
+    vim.notify('Job triggered successfully', vim.log.levels.INFO)
+  end)
+end
+
 return GitlabGraphQLProvider

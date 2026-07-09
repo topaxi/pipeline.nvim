@@ -226,6 +226,10 @@ function M.open()
     M.pipeline:dispatch(ui.get_pipeline())
   end, { noremap = true, desc = 'Dispatch pipeline run' })
 
+  ui.split:map('n', 't', function()
+    M.pipeline:trigger(ui.get_job())
+  end, { noremap = true, desc = 'Trigger Job run' })
+
   ui.split:map('n', 'rr', function()
     M.pipeline:retry(ui.get_run())
   end, { noremap = true, desc = 'Retry pipeline run' })

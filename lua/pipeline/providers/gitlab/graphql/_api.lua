@@ -37,6 +37,19 @@ local pipelines_with_jobs_query = [[
   }
 ]]
 
+local play_job_query = [[
+  mutation ($jobId: CiProcessableID!) { 
+    jobPlay(input: {id: $jobId}) {
+      clientMutationId
+      errors
+      job {
+        startedAt
+        status
+      }
+    }
+  }
+]]
+
 local function gl_utils()
   return require('pipeline.providers.gitlab.utils')
 end
@@ -106,12 +119,18 @@ end
 ---@field pipelines { nodes: pipeline.providers.gitlab.graphql.QueryResponsePipeline[] }
 
 ---@class pipeline.providers.gitlab.graphql.QueryResponse
----@field data { project: pipeline.providers.gitlab.graphql.QueryResponseProject }
+---@field data { project: pipeline.providers.gitlab.graphql.QueryResponseProject, jobPlay: pipeline.providers.gitlab.graphql.QueryResponseJobPlay }
+---@field errors { message: string }[]
+
+---@class pipeline.providers.gitlab.graphql.QueryResponseJobPlay
+---@field clientMutationId string
+---@field errors string[]
+---@field job pipeline.providers.gitlab.graphql.QueryResponseJob
 
 ---@param host string
 ---@param repo string
 ---@param limit number
----@param callback fun(response: pipeline.providers.gitlab.graphql.QueryResponse)
+---@param callback fun(response: pipeline.providers.gitlab.graphql.QueryResponse|nil)
 function M.get_project_pipelines(host, repo, limit, callback)
   graphql_request(
     host,
@@ -123,6 +142,24 @@ function M.get_project_pipelines(host, repo, limit, callback)
         return
       end
       callback(response)
+    end
+  )
+end
+
+---@param host string
+---@param jobId string
+---@param callback fun(err: string|nil, response: pipeline.providers.gitlab.graphql.QueryResponse|nil)
+function M.trigger_manual_job(host, jobId, callback)
+  graphql_request(
+    host,
+    play_job_query,
+    { jobId = jobId },
+    function(err, response)
+      if err then
+        error(err)
+        return
+      end
+      callback(err, response)
     end
   )
 end

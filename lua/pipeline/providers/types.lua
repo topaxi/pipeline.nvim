@@ -1,6 +1,6 @@
 ---@meta
 
----@alias pipeline.Status 'pending'|'queued'|'requested'|'waiting'|'in_progress'|'completed'|'unknown'
+---@alias pipeline.Status 'pending'|'manual'|'queued'|'requested'|'waiting'|'in_progress'|'completed'|'unknown'
 ---@alias pipeline.Conclusion 'success'|'failure'|'cancelled'|'skipped'|'action_required'|'unknown'
 
 ---@class pipeline.BasePipelineObject
